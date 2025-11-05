@@ -18,4 +18,9 @@ export const getRecentEvents = async (limit = 100) => {
   return data;
 };
 
+export const getLatestAggregates = async () => {
+  const { data } = await api.get('/aggregates/latest');
+  return data.aggregates;
+};
+
 

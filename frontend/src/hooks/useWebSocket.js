@@ -7,10 +7,14 @@ const TOKEN = import.meta.env.VITE_JWT_TOKEN || 'demo-token';
 export function useWebSocket() {
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
-  const socketRef = useRef(null);
+  const [socket, setSocket] = useState(null);
+  const created = useRef(false);
 
   useEffect(() => {
-    const socket = io(BACKEND_URL, {
+    if (created.current) return; // ensure single instance
+    created.current = true;
+
+    const s = io(BACKEND_URL, {
       auth: { token: TOKEN },
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -19,17 +23,21 @@ export function useWebSocket() {
       reconnectionAttempts: 10,
     });
 
-    socketRef.current = socket;
+    setSocket(s);
 
-    socket.on('connect', () => setConnected(true));
-    socket.on('disconnect', () => setConnected(false));
-    socket.on('event-ack', () => setLastUpdate(Date.now()));
-    socket.on('aggregate-update', () => setLastUpdate(Date.now()));
+    s.on('connect', () => setConnected(true));
+    s.on('disconnect', () => setConnected(false));
+    s.on('connect_error', (err) => {
+      console.error('WS connect_error', err?.message || err);
+      setConnected(false);
+    });
+    s.on('event-ack', () => setLastUpdate(Date.now()));
+    s.on('aggregate-update', () => setLastUpdate(Date.now()));
 
-    return () => socket.close();
+    return () => s.close();
   }, []);
 
-  return { connected, socket: socketRef.current, lastUpdate };
+  return { connected, socket, lastUpdate };
 }
 
 

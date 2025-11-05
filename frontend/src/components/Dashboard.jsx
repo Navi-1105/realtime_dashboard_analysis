@@ -5,6 +5,7 @@ import EventsPerSecondChart from './Charts/EventsPerSecondChart.jsx';
 import TopRoutesChart from './Charts/TopRoutesChart.jsx';
 import ErrorRateChart from './Charts/ErrorRateChart.jsx';
 import { generateTestEvents } from '../services/eventGenerator.js';
+import { getLatestAggregates } from '../services/api.js';
 
 export default function Dashboard() {
   const [aggregates, setAggregates] = useState({});
@@ -22,6 +23,21 @@ export default function Dashboard() {
     };
   }, [socket]);
 
+  // Polling fallback when offline
+  useEffect(() => {
+    if (connected) return; // only when offline
+    let timer = null;
+    const tick = async () => {
+      try {
+        const latest = await getLatestAggregates();
+        setAggregates(latest || {});
+      } catch {}
+      timer = setTimeout(tick, 2000);
+    };
+    tick();
+    return () => timer && clearTimeout(timer);
+  }, [connected]);
+
   const data = aggregates[timeRange] || aggregates[60000] || {};
 
   return (
@@ -31,10 +47,7 @@ export default function Dashboard() {
           <div className="glass" style={{ borderRadius:16, padding:20, display:'grid', gap:8, alignContent:'space-between' }}>
             <p className="card-title">My Balance</p>
             <div className="number-lg">${(data.totalEvents || 17754).toLocaleString()}</div>
-            <div style={{ display:'flex', alignItems:'center', gap:8, color:'var(--text-2)' }}>
-              <span>Monthly</span>
-              <span>▾</span>
-            </div>
+            <button type="button" style={{ display:'flex', alignItems:'center', gap:8, color:'var(--text-2)', background:'transparent', border:'none', cursor:'pointer', width:'fit-content' }} onClick={()=>alert('Timeframe menu coming soon')}>Monthly ▾</button>
           </div>
           <div className="glass" style={{ borderRadius:16, padding:20 }}>
             <p className="card-title">Performance</p>
@@ -102,7 +115,7 @@ export default function Dashboard() {
               <option value={5000}>5s</option>
               <option value={60000}>60s</option>
             </select>
-            <button className="btn-primary" onClick={()=> socket && generateTestEvents(socket, 80)}>Generate Demo Data</button>
+            <button type="button" className="btn-primary" onClick={()=> generateTestEvents(socket, 80)}>Generate Demo Data</button>
           </div>
         </div>
       </div>

@@ -22,6 +22,15 @@ body {
   background: var(--bg-gradient) fixed;
 }
 
+/* Dark theme */
+[data-theme="dark"] body, [data-theme="dark"] {
+  --bg-gradient: radial-gradient(1200px 800px at 10% 0%, #0f1020 0%, #171827 30%, #1e1f2f 60%, #1a1b2a 100%);
+  --glass-bg: rgba(25, 25, 35, 0.55);
+  --glass-stroke: rgba(255, 255, 255, 0.08);
+  --text-1: #f3f4f6;
+  --text-2: #a1a1aa;
+}
+
 .glass {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
@@ -50,7 +59,11 @@ body {
   gap: 24px;
   padding: 24px;
   min-height: 100vh;
+  position: relative;
 }
+.topbar, .sidebar, .content, .glass, button, select, input { pointer-events: auto; }
+.chart-300 canvas { pointer-events: none; }
+
 
 .sidebar { grid-row: 1 / span 2; grid-column: 1; }
 .topbar { grid-row: 1; grid-column: 2; }

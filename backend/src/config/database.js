@@ -29,6 +29,10 @@ async function createIndexes() {
   const aggregates = db.collection('aggregates');
   await events.createIndex({ timestamp: -1 });
   await events.createIndex({ clientEventId: 1 }, { unique: true, sparse: true });
+  // Optional TTL for raw events (7 days) – comment out if you need to keep forever
+  try {
+    await events.createIndex({ storedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 7 });
+  } catch {}
   await aggregates.createIndex({ window: 1, timestamp: -1 });
 }
 

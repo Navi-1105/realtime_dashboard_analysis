@@ -7,6 +7,8 @@ import { connectDB } from './config/database.js';
 import { setupWebSocket } from './websocket.js';
 import eventRoutes from './routes/events.js';
 import healthRoutes from './routes/health.js';
+import metricsRoutes from './routes/metrics.js';
+import aggregatesRoutes from './routes/aggregates.js';
 import { authMiddleware } from './middleware/auth.js';
 import rateLimiter from './middleware/rateLimiter.js';
 
@@ -30,6 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check (no auth)
 app.use('/health', healthRoutes);
+app.use('/metrics', metricsRoutes);
+app.use('/api/aggregates', aggregatesRoutes);
 
 // Rate limiting for API
 app.use('/api', rateLimiter);
