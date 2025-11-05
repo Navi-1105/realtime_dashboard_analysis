@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: analytics-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: analytics
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - analytics-network
+
+  backend:
+    build: ./backend
+    container_name: analytics-backend
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MONGODB_URI: mongodb://mongodb:27017
+      DB_NAME: analytics
+      JWT_SECRET: your-super-secret-jwt-key
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      - mongodb
+    networks:
+      - analytics-network
+
+  frontend:
+    build: ./frontend
+    container_name: analytics-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_BACKEND_URL: http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - analytics-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  analytics-network:
+    driver: bridge
+
+

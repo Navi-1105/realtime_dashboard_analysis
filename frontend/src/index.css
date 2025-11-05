@@ -1,0 +1,74 @@
+:root {
+  --bg-gradient: radial-gradient(1200px 800px at 10% 0%, #ffd6ff 0%, #e0e7ff 30%, #fdf2f8 60%, #ffffff 100%);
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-stroke: rgba(255, 255, 255, 0.35);
+  --card-shadow: 0 10px 30px rgba(31, 38, 135, 0.15);
+  --text-1: #2b2b2f;
+  --text-2: #6b7280;
+  --brand-1: #7c3aed;
+  --brand-2: #06b6d4;
+  --accent: #f43f5e;
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--text-1);
+  background: var(--bg-gradient) fixed;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-stroke);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--card-shadow);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+  color: white;
+  border: 0;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.hidden-scroll::-webkit-scrollbar { display: none; }
+.hidden-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+.container {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  grid-template-rows: 80px 1fr;
+  gap: 24px;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.sidebar { grid-row: 1 / span 2; grid-column: 1; }
+.topbar { grid-row: 1; grid-column: 2; }
+.content { grid-row: 2; grid-column: 2; }
+
+.card-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  letter-spacing: .2px;
+  color: var(--text-2);
+}
+
+.number-lg {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.chart-300 { height: 300px; position: relative; }
+
+
