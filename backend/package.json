@@ -8,7 +8,9 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "load": "node scripts/load_generator.js --rps=100 --duration=30"
+    "load": "node scripts/load_generator.js --rps=100 --duration=30",
+    "auto-traffic": "node scripts/auto_traffic.js",
+    "db:setup": "node scripts/setup_indexes.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

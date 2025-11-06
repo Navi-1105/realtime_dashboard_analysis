@@ -2,41 +2,28 @@
 
 A full-stack real-time analytics dashboard with a Ramotion-style glassmorphism UI. Backend: Node.js, Express, Socket.IO, MongoDB. Frontend: React (Vite), Chart.js.
 
-## Run locally
+## Run Commands
 
-1. Install deps
+**📋 See [RUN.md](./RUN.md) for minimal command list**
 
-```
-make install
-```
+### Quick Run
+```bash
+# 1. MongoDB
+brew services start mongodb/brew/mongodb-community@7.0
 
-2. Start MongoDB via Docker (or use docker-compose):
+# 2. Backend (Terminal 1)
+cd backend && npm run dev
 
-```
-docker run -d -p 27017:27017 --name mongodb mongo:7
-```
+# 3. Frontend (Terminal 2)
+cd frontend && npm run dev
 
-3. Backend env
-
-```
-cp backend/.env.example backend/.env
-```
-
-4. Start dev servers
-
-```
-make backend-dev
-make frontend-dev
+# 4. Traffic (Terminal 3)
+cd backend
+TOKEN=$(node -e "console.log(require('jsonwebtoken').sign({userId:'demo-user'}, 'your-super-secret-jwt-key-change-in-production'))")
+npm run load -- --token=$TOKEN
 ```
 
-Or start everything with Docker:
-
-```
-make dev
-```
-
-Frontend: http://localhost:5173
-Backend: http://localhost:3000
+**Access:** http://localhost:5173 | http://localhost:3000
 
 ## Notes
 - WebSocket auth expects `VITE_JWT_TOKEN`/`JWT_SECRET` (defaults allow demo).

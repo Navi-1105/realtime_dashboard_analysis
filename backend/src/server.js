@@ -30,6 +30,22 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Realtime Analytics Dashboard API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      metrics: '/metrics',
+      events: '/api/events',
+      aggregates: '/api/aggregates/latest',
+      websocket: 'ws://localhost:3000'
+    },
+    docs: 'See README.md for API documentation'
+  });
+});
+
 // Health check (no auth)
 app.use('/health', healthRoutes);
 app.use('/metrics', metricsRoutes);

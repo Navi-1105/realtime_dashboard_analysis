@@ -27,13 +27,22 @@ export function getDB() {
 async function createIndexes() {
   const events = db.collection('events');
   const aggregates = db.collection('aggregates');
-  await events.createIndex({ timestamp: -1 });
-  await events.createIndex({ clientEventId: 1 }, { unique: true, sparse: true });
-  // Optional TTL for raw events (7 days) – comment out if you need to keep forever
-  try {
-    await events.createIndex({ storedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 7 });
-  } catch {}
-  await aggregates.createIndex({ window: 1, timestamp: -1 });
+  
+  // Helper to safely create indexes (ignore if already exists)
+  async function safeIndex(col, keys, options = {}) {
+    try {
+      await col.createIndex(keys, options);
+    } catch (e) {
+      // 68 = IndexOptionsConflict, 85 = IndexOptionsConflict (different name)
+      if (![68, 85].includes(e?.code)) throw e;
+    }
+  }
+  
+  await safeIndex(events, { timestamp: -1 });
+  await safeIndex(events, { clientEventId: 1 }, { unique: true, sparse: true });
+  // Optional TTL for raw events (7 days)
+  await safeIndex(events, { storedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 7 });
+  await safeIndex(aggregates, { window: 1, timestamp: -1 });
 }
 
 

@@ -1,18 +1,28 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export default function ActiveUsersChart({ data }) {
+  const [history, setHistory] = useState([]);
+  const maxHistory = 20;
+
+  useEffect(() => {
+    if (data?.uniqueUsers !== undefined) {
+      setHistory(prev => {
+        const newHistory = [...prev, data.uniqueUsers];
+        return newHistory.slice(-maxHistory);
+      });
+    }
+  }, [data]);
+
   const chartData = useMemo(() => {
-    const value = data?.uniqueUsers || 0;
-    const ts = data?.timestamp ? new Date(data.timestamp).toLocaleTimeString() : '';
     return {
-      labels: [ts],
+      labels: history.map((_, i) => `t-${history.length - i}`),
       datasets: [{
         label: 'Active Users',
-        data: [value],
+        data: history,
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: (ctx) => {
           const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
@@ -24,12 +34,29 @@ export default function ActiveUsersChart({ data }) {
         fill: true
       }]
     };
-  }, [data]);
+  }, [history]);
 
   const options = {
     responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 }
+      }
+    },
+    interaction: {
+      mode: 'nearest',
+      axis: 'x',
+      intersect: false
+    }
   };
 
   return (

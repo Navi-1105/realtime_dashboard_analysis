@@ -84,4 +84,31 @@ body {
 
 .chart-300 { height: 300px; position: relative; }
 
+/* Sidebar button styles */
+.sidebar-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-btn:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3) !important;
+}
+
+.sidebar-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.sidebar-btn.active {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.6);
+  }
+}
+
 
