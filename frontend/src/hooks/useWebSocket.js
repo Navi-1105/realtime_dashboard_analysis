@@ -14,25 +14,48 @@ export function useWebSocket() {
     if (created.current) return; // ensure single instance
     created.current = true;
 
+    console.log('🔌 Initializing WebSocket connection to:', BACKEND_URL);
+    console.log('   Using token:', TOKEN ? 'Yes (provided)' : 'No');
+
     const s = io(BACKEND_URL, {
       auth: { token: TOKEN },
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'], // Try polling first, then upgrade to websocket
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 30000,
-      reconnectionAttempts: 10,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
+      timeout: 20000,
+      forceNew: true, // Force new connection
+      upgrade: true,
+      rememberUpgrade: false,
+      autoConnect: true
     });
 
     setSocket(s);
 
     s.on('connect', () => {
+      console.log('✅ WebSocket connected successfully');
       setConnected(true);
       // Request replay data on reconnect
       s.emit('reconnect-request');
     });
-    s.on('disconnect', () => setConnected(false));
+    s.on('disconnect', (reason) => {
+      console.warn('⚠️ WebSocket disconnected:', reason);
+      setConnected(false);
+    });
     s.on('connect_error', (err) => {
-      console.error('WS connect_error', err?.message || err);
+      console.error('❌ WebSocket connect_error:', err?.message || err);
+      setConnected(false);
+    });
+    s.on('reconnect', (attemptNumber) => {
+      console.log(`🔄 WebSocket reconnected after ${attemptNumber} attempts`);
+      setConnected(true);
+    });
+    s.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`🔄 WebSocket reconnection attempt ${attemptNumber}`);
+    });
+    s.on('reconnect_failed', () => {
+      console.error('❌ WebSocket reconnection failed after all attempts');
       setConnected(false);
     });
     s.on('event-ack', () => setLastUpdate(Date.now()));

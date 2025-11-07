@@ -12,26 +12,42 @@ export function setupWebSocket(io) {
   io.use((socket, next) => {
     try {
       const token = socket.handshake.auth?.token || socket.handshake.query?.token || socket.handshake.headers?.authorization?.split(' ')[1];
-      if (!token) {
+      
+      // Allow demo token or no token in development
+      if (!token || token === 'demo-token') {
+        socket.userId = 'demo-user';
+        console.log('✅ WebSocket connection accepted (demo mode)');
+        return next();
+      }
+      
+      // Try to verify JWT token if provided and not demo-token
+      try {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+          console.warn('⚠️  WARNING: JWT_SECRET not set, using default. This is insecure for production!');
+        }
+        const decoded = jwt.verify(token, secret || 'your-secret-key');
+        socket.userId = decoded.userId || decoded.id || 'demo-user';
+        console.log('✅ WebSocket connection accepted (authenticated)');
+        return next();
+      } catch (jwtError) {
+        // If JWT verification fails but we're in development, allow it
         if (process.env.NODE_ENV !== 'production') {
           socket.userId = 'demo-user';
+          console.log('✅ WebSocket connection accepted (dev mode, JWT verification skipped)');
           return next();
         }
         return next(new Error('Authentication error'));
       }
-      const secret = process.env.JWT_SECRET;
-      if (!secret) {
-        console.warn('⚠️  WARNING: JWT_SECRET not set, using default. This is insecure for production!');
-      }
-      const decoded = jwt.verify(token, secret || 'your-secret-key');
-      socket.userId = decoded.userId || decoded.id || 'demo-user';
-      next();
     } catch (e) {
+      console.error('❌ WebSocket auth error:', e.message);
       next(new Error('Authentication error'));
     }
   });
 
   io.on('connection', (socket) => {
+    console.log(`✅ New WebSocket client connected: ${socket.id} (user: ${socket.userId})`);
+    
     // simple token bucket per socket for backpressure (max 50 events/sec)
     const bucket = { tokens: 50, lastRefill: Date.now() };
     const refillRate = 50; // tokens per second

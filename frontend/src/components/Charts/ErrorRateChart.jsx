@@ -1,42 +1,82 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export default function ErrorRateChart({ data }) {
   const [history, setHistory] = useState([]);
   const maxHistory = 20;
 
   useEffect(() => {
-    if (data?.errors !== undefined && data?.totalEvents !== undefined) {
-      const rate = data.totalEvents > 0 ? (data.errors / data.totalEvents) * 100 : 0;
-      setHistory(prev => [...prev, rate].slice(-maxHistory));
+    if (data && typeof data === 'object') {
+      const errors = data.errors;
+      const totalEvents = data.totalEvents;
+      if (errors !== undefined && totalEvents !== undefined) {
+        const errorCount = typeof errors === 'number' ? errors : 0;
+        const eventCount = typeof totalEvents === 'number' ? totalEvents : 0;
+        const rate = eventCount > 0 ? (errorCount / eventCount) * 100 : 0;
+        setHistory(prev => {
+          const newHistory = [...prev, rate];
+          return newHistory.slice(-maxHistory);
+        });
+      }
     }
   }, [data]);
 
-  const chartData = useMemo(() => ({
-    labels: history.map((_, i) => `t-${history.length - i}`),
-    datasets: [{
-      label: 'Error Rate (%)',
-      data: history,
-      borderColor: 'rgb(255, 159, 64)',
-      backgroundColor: (ctx) => {
-        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
-        g.addColorStop(0, 'rgba(255, 159, 64, 0.35)');
-        g.addColorStop(1, 'rgba(255, 159, 64, 0.05)');
-        return g;
-      },
-      tension: 0.4,
-      fill: true
-    }]
-  }), [history]);
+  const chartData = useMemo(() => {
+    if (history.length === 0) {
+      return {
+        labels: ['No data'],
+        datasets: [{
+          label: 'Error Rate (%)',
+          data: [0],
+          borderColor: 'rgb(255, 159, 64)',
+          backgroundColor: 'rgba(255, 159, 64, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      };
+    }
+    return {
+      labels: history.map((_, i) => `t-${history.length - i}`),
+      datasets: [{
+        label: 'Error Rate (%)',
+        data: history,
+        borderColor: 'rgb(255, 159, 64)',
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+          g.addColorStop(0, 'rgba(255, 159, 64, 0.35)');
+          g.addColorStop(1, 'rgba(255, 159, 64, 0.05)');
+          return g;
+        },
+        tension: 0.4,
+        fill: true
+      }]
+    };
+  }, [history]);
 
-  const options = { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, max: 100 } } };
+  const options = { 
+    responsive: true, 
+    maintainAspectRatio: false,
+    plugins: { 
+      legend: { display: false },
+      tooltip: { enabled: history.length > 0 }
+    }, 
+    scales: { 
+      y: { beginAtZero: true, max: 100 },
+      x: { display: history.length > 0 }
+    } 
+  };
 
   return (
     <div className="chart-300">
-      <Line data={chartData} options={options} />
+      <Line 
+        key={history.length} 
+        data={chartData} 
+        options={options}
+        updateMode="active"
+      />
     </div>
   );
 }

@@ -27,7 +27,10 @@ npm run load -- --token=$TOKEN
 
 ## Notes
 - WebSocket auth expects `VITE_JWT_TOKEN`/`JWT_SECRET` (defaults allow demo).
-- Use the "Generate Demo Data" button to stream synthetic events.
+- Use the "Generate Demo Data" button to start continuous traffic generation.
+- Traffic generation supports configurable rates (20/s to 100/s) via dropdown.
+- WebSocket connection with automatic fallback to HTTP (throttled) if WebSocket unavailable.
+- Charts display real-time data with smooth animations and gradient fills.
 
 ## Feature Checklist (Nimbus requirements)
 
@@ -41,7 +44,8 @@ npm run load -- --token=$TOKEN
 - Performance & throttling: API rate limit; per-socket token‑bucket (50 evt/s) and payload size checks; debounced DB writes.
 - Security: JWT-protected REST/WS; CORS; schema validation.
 - Observability: `/metrics` JSON (uptime, memory, counts); `/health` and `/health/ready` endpoints; structured console logs.
-- Testing & demo: WebSocket load generator (`npm run load`) to simulate traffic; UI button for demo events.
+- Testing & demo: WebSocket load generator (`npm run load`) to simulate traffic; UI button for continuous demo traffic generation with start/stop controls and rate selection (20/s to 100/s).
+- Traffic Generation: Continuous event generation with WebSocket priority, HTTP fallback with throttling, and configurable event rates.
 - Dev & ops: Docker Compose, env-based config, Makefile scripts for install/build/dev.
 
 

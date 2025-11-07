@@ -19,8 +19,19 @@ export const getRecentEvents = async (limit = 100) => {
 };
 
 export const getLatestAggregates = async () => {
-  const { data } = await api.get('/aggregates/latest');
-  return data.aggregates;
+  try {
+    const { data } = await api.get('/aggregates/latest');
+    return data.aggregates;
+  } catch (error) {
+    console.error('Failed to fetch aggregates:', error);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received. Is backend running?');
+    }
+    return {};
+  }
 };
 
 
