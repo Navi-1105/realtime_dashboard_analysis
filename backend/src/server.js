@@ -9,6 +9,7 @@ import eventRoutes from './routes/events.js';
 import healthRoutes from './routes/health.js';
 import metricsRoutes from './routes/metrics.js';
 import aggregatesRoutes from './routes/aggregates.js';
+import authRoutes from './routes/auth.js';
 import { authMiddleware } from './middleware/auth.js';
 import rateLimiter from './middleware/rateLimiter.js';
 
@@ -54,6 +55,10 @@ app.get('/', (req, res) => {
 // Health check (no auth)
 app.use('/health', healthRoutes);
 app.use('/metrics', metricsRoutes);
+
+// Auth routes (no auth required for login)
+app.use('/api/auth', authRoutes);
+
 app.use('/api/aggregates', aggregatesRoutes);
 
 // Rate limiting for API

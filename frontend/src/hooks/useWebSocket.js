@@ -2,23 +2,31 @@ import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-const TOKEN = import.meta.env.VITE_JWT_TOKEN || 'demo-token';
+
+// Get token from localStorage or fallback
+const getToken = () => {
+  return localStorage.getItem('jwt_token') || import.meta.env.VITE_JWT_TOKEN || 'demo-token';
+};
 
 export function useWebSocket() {
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [socket, setSocket] = useState(null);
-  const created = useRef(false);
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    if (created.current) return; // ensure single instance
-    created.current = true;
+    // Clean up existing socket if any
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
 
+    const token = getToken();
     console.log('🔌 Initializing WebSocket connection to:', BACKEND_URL);
-    console.log('   Using token:', TOKEN ? 'Yes (provided)' : 'No');
+    console.log('   Using token:', token ? 'Yes (provided)' : 'No');
 
     const s = io(BACKEND_URL, {
-      auth: { token: TOKEN },
+      auth: { token },
       transports: ['polling', 'websocket'], // Try polling first, then upgrade to websocket
       reconnection: true,
       reconnectionDelay: 1000,
@@ -31,6 +39,7 @@ export function useWebSocket() {
       autoConnect: true
     });
 
+    socketRef.current = s;
     setSocket(s);
 
     s.on('connect', () => {
@@ -62,8 +71,13 @@ export function useWebSocket() {
     s.on('aggregate-update', () => setLastUpdate(Date.now()));
     s.on('reconnect-data', () => setLastUpdate(Date.now()));
 
-    return () => s.close();
-  }, []);
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+        socketRef.current = null;
+      }
+    };
+  }, []); // Re-run when component mounts (Dashboard only mounts when authenticated)
 
   return { connected, socket, lastUpdate };
 }
