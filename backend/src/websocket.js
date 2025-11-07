@@ -5,6 +5,9 @@ import jwt from 'jsonwebtoken';
 const eventService = new EventService();
 const aggregationService = new AggregationService();
 
+// Export aggregationService for graceful shutdown
+export { aggregationService };
+
 export function setupWebSocket(io) {
   io.use((socket, next) => {
     try {
@@ -16,7 +19,11 @@ export function setupWebSocket(io) {
         }
         return next(new Error('Authentication error'));
       }
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        console.warn('⚠️  WARNING: JWT_SECRET not set, using default. This is insecure for production!');
+      }
+      const decoded = jwt.verify(token, secret || 'your-secret-key');
       socket.userId = decoded.userId || decoded.id || 'demo-user';
       next();
     } catch (e) {

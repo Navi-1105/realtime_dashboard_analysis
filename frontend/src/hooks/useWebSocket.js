@@ -25,7 +25,11 @@ export function useWebSocket() {
 
     setSocket(s);
 
-    s.on('connect', () => setConnected(true));
+    s.on('connect', () => {
+      setConnected(true);
+      // Request replay data on reconnect
+      s.emit('reconnect-request');
+    });
     s.on('disconnect', () => setConnected(false));
     s.on('connect_error', (err) => {
       console.error('WS connect_error', err?.message || err);
@@ -33,6 +37,7 @@ export function useWebSocket() {
     });
     s.on('event-ack', () => setLastUpdate(Date.now()));
     s.on('aggregate-update', () => setLastUpdate(Date.now()));
+    s.on('reconnect-data', () => setLastUpdate(Date.now()));
 
     return () => s.close();
   }, []);

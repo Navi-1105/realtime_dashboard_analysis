@@ -17,9 +17,13 @@ export default function Dashboard() {
     socket.emit('join-dashboard', 'main');
     socket.on('initial-state', ({ aggregates }) => setAggregates(aggregates));
     socket.on('aggregate-update', ({ window, aggregates }) => setAggregates(prev => ({ ...prev, [window]: aggregates })));
+    socket.on('reconnect-data', ({ aggregates }) => {
+      if (aggregates) setAggregates(aggregates);
+    });
     return () => {
       socket.off('initial-state');
       socket.off('aggregate-update');
+      socket.off('reconnect-data');
     };
   }, [socket]);
 

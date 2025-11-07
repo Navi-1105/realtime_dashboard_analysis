@@ -23,8 +23,18 @@ export class EventService {
     }
 
     const doc = { _id: uuidv4(), ...event, storedAt: new Date() };
-    await collection.insertOne(doc);
-    return doc;
+    try {
+      await collection.insertOne(doc);
+      return doc;
+    } catch (err) {
+      // Handle duplicate key error (race condition with unique index)
+      if (err.code === 11000 || err.codeName === 'DuplicateKey') {
+        // Return existing document if duplicate
+        const existing = await collection.findOne({ clientEventId: event.clientEventId });
+        if (existing) return existing;
+      }
+      throw err;
+    }
   }
 
   async getRecentEvents(limit = 100) {
