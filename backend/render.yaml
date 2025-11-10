@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: analytics-backend
+    env: node
+    plan: free
+    branch: main
+    rootDirectory: backend
+    buildCommand: npm ci && npm run build || true
+    startCommand: node src/server.js
+    envVars: []           # DO NOT store secrets in repo; set them in Render UI
+    healthCheckPath: "/health"
+    autoDeploy: true
+    disk:
+      name: analytics-data
+      mountPath: /data
+      sizeGB: 1
