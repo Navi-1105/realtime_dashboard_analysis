@@ -1,22 +1,15 @@
 services:
   - type: web
     name: analytics-backend
-    runtime: node
+    env: node
+    plan: free
+    branch: main
     rootDirectory: backend
-    buildCommand: npm install
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10000
-      - key: MONGODB_URI
-        sync: false
-      - key: DB_NAME
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-    healthCheckPath: /health
+    buildCommand: npm ci && npm run build || true
+    startCommand: node src/server.js
+    envVars: []           # DO NOT store secrets in repo; set them in Render UI
+    healthCheckPath: "/health"
+    autoDeploy: true
     disk:
       name: analytics-data
       mountPath: /data
