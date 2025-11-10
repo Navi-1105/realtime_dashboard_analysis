@@ -6,5 +6,3 @@ export default rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-
