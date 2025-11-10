@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: analytics-backend
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+    healthCheckPath: /health
+    disk:
+      name: analytics-data
+      mountPath: /data
+      sizeGB: 1
