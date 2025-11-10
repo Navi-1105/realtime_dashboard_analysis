@@ -2,6 +2,7 @@ services:
   - type: web
     name: analytics-backend
     runtime: node
+    rootDirectory: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
